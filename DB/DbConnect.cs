@@ -32,15 +32,51 @@ namespace SimpleEchoBot.DB
                 while (rdr.Read())
                 {
                     int dlgId = Convert.ToInt32(rdr["DLG_ID"]);
-                    string dlgNm = rdr["DLG_NAME"] as string;
-                    string dlgMent = rdr["DLG_DESCRIPTION"] as string;
+                    string dlgName = rdr["DLG_NAME"] as string;
+                    string dlgDescription = rdr["DLG_DESCRIPTION"] as string;
                     string dlgLang = rdr["DLG_LANG"] as string;
 
                     DialogList dlg = new DialogList();
                     dlg.dlgId = dlgId;
-                    dlg.dlgNm = dlgNm;
-                    dlg.dlgMent = dlgMent;
+                    dlg.dlgName = dlgName;
+                    dlg.dlgDescription = dlgDescription;
                     dlg.dlgLang = dlgLang;
+
+                    dialog.Add(dlg);
+                }
+            }
+            return dialog;
+        }
+
+        public List<DialogList> SelectDialog(int dlgID)
+        {
+            SqlDataReader rdr = null;
+            List<DialogList> dialog = new List<DialogList>();
+
+            using (SqlConnection conn = new SqlConnection(connStr))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
+                cmd.Connection = conn;
+                cmd.CommandText = "SELECT DLG_ID, DLG_NAME, DLG_DESCRIPTION, DLG_LANG, DLG_TYPE FROM TBL_DLG WHERE DLG_ID = @dlgID AND USE_YN = 'Y' AND DLG_ID > 999 ORDER BY DLG_ID";
+
+                cmd.Parameters.AddWithValue("@dlgID", dlgID);
+                rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+                while (rdr.Read())
+                {
+                    int dlgId = Convert.ToInt32(rdr["DLG_ID"]);
+                    string dlgName = rdr["DLG_NAME"] as string;
+                    string dlgDescription = rdr["DLG_DESCRIPTION"] as string;
+                    string dlgLang = rdr["DLG_LANG"] as string;
+                    string dlgType = rdr["DLG_TYPE"] as string;
+
+                    DialogList dlg = new DialogList();
+                    dlg.dlgId = dlgId;
+                    dlg.dlgName = dlgName;
+                    dlg.dlgDescription = dlgDescription;
+                    dlg.dlgLang = dlgLang;
+                    dlg.dlgType = dlgType;
 
                     dialog.Add(dlg);
                 }
@@ -198,6 +234,41 @@ namespace SimpleEchoBot.DB
                 }
             }
             return dialogMedia;
+        }
+
+        public List<LuisList> SelectLuis(string intent, String entities)
+        {
+            SqlDataReader rdr = null;
+            List<LuisList> luisList = new List<LuisList>();
+
+            using (SqlConnection conn = new SqlConnection(connStr))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand();
+                cmd.Connection = conn;
+                cmd.CommandText = " SELECT RELATION_ID, LUIS_ID, LUIS_INTENT, LUIS_ENTITIES, BEFORE_1_LUIS, BEFORE_1_INTENT, BEFORE_1_ENTITIES," +
+                                  " BEFORE_2_LUIS, BEFORE_2_INTENT, BEFORE_2_ENTITIES, BEFORE_3_LUIS, BEFORE_3_INTENT, BEFORE_3_ENTITIES, DLG_ID, DLG_ORDER_NO " +
+                                  " FROM TBL_DLG_RELATION_LUIS WHERE LUIS_ID = @intent" +
+                                  " AND LUIS_ENTITIES LIKE '%" + entities + "%'" +
+                                  " AND USE_YN = 'Y' ORDER BY DLG_ORDER_NO";
+
+                cmd.Parameters.AddWithValue("@intent", intent);
+
+                rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+                while (rdr.Read())
+                {
+                    int dlgId = Convert.ToInt32(rdr["DLG_ID"]);
+                    string dlgOrderNo = rdr["DLG_ORDER_NO"] as string;
+
+                    LuisList luis = new LuisList();
+                    luis.dlgId = dlgId;
+                    luis.dlgOrderNo = dlgOrderNo;
+
+                    luisList.Add(luis);
+                }
+            }
+            return luisList;
         }
 
     }

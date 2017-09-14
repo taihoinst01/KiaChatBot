@@ -139,8 +139,10 @@
     <Compile Include="Models\ButtonList.cs" />
     <Compile Include="Models\CardList.cs" />
     <Compile Include="Models\DialogList.cs" />
+    <Compile Include="Models\LuisList.cs" />
     <Compile Include="Models\MediaList.cs" />
     <Compile Include="Models\TextList.cs" />
+    <Compile Include="Models\Translator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

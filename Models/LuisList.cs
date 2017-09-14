@@ -5,12 +5,9 @@ using System.Web;
 
 namespace SimpleEchoBot.Models
 {
-    public class DialogList
+    public class LuisList
     {
         public int dlgId;
-        public string dlgName;
-        public string dlgDescription;
-        public string dlgLang;
-        public string dlgType;
+        public string dlgOrderNo;
     }
 }
