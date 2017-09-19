@@ -12,7 +12,7 @@ namespace SimpleEchoBot.DB
 {
     public class DbConnect
     {
-        string connStr = "Data Source=faxtimedb.database.windows.net;Initial Catalog=taihoLab;User ID=faxtime;Password=test2016!;";
+        string connStr = "Data Source=taihoinst.database.windows.net;Initial Catalog=taihoLab;User ID=taihoinst;Password=taiho123@;";
         StringBuilder sb = new StringBuilder();
 
         public List<DialogList> SelectInitDialog()
@@ -248,7 +248,7 @@ namespace SimpleEchoBot.DB
                 cmd.Connection = conn;
                 cmd.CommandText = " SELECT RELATION_ID, LUIS_ID, LUIS_INTENT, LUIS_ENTITIES, BEFORE_1_LUIS, BEFORE_1_INTENT, BEFORE_1_ENTITIES," +
                                   " BEFORE_2_LUIS, BEFORE_2_INTENT, BEFORE_2_ENTITIES, BEFORE_3_LUIS, BEFORE_3_INTENT, BEFORE_3_ENTITIES, DLG_ID, DLG_ORDER_NO " +
-                                  " FROM TBL_DLG_RELATION_LUIS WHERE LUIS_ID = @intent" +
+                                  " FROM TBL_DLG_RELATION_LUIS WHERE LUIS_INTENT = @intent" +
                                   " AND LUIS_ENTITIES LIKE '%" + entities + "%'" +
                                   " AND USE_YN = 'Y' ORDER BY DLG_ORDER_NO";
 

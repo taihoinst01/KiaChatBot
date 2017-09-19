@@ -25,7 +25,7 @@ namespace Microsoft.Bot.Sample.SimpleEchoBot
         public readonly string TEXTDLG = "2";
         public readonly string CARDDLG = "3";
         public readonly string MEDIADLG = "4";
-
+        int userDataNum = 0;
         /// <summary>
         /// POST: api/Messages
         /// receive a message from a user and send replies
@@ -202,13 +202,14 @@ namespace Microsoft.Bot.Sample.SimpleEchoBot
                 string orgENGMent_history = "";
                 JObject Luis = new JObject();
                 DbConnect db = new DbConnect();
+                StateClient stateClient = activity.GetStateClient();
+                BotData userData = await stateClient.BotState.GetUserDataAsync(activity.ChannelId, activity.From.Id);
                 ConnectorClient connector = new ConnectorClient(new Uri(activity.ServiceUrl));
 
                 orgMent = activity.Text;
+
                 Translator translateInfo = await getTranslate(orgMent);
-
                 orgENGMent_history = Regex.Replace(translateInfo.data.translations[0].translatedText, @"[^a-zA-Z0-9¤¡-ÆR-\s-&#39;]", "", RegexOptions.Singleline);
-
                 orgENGMent_history = orgENGMent_history.Replace("&#39;", "'");
 
                 Luis = await GetIntentFromBotLUIS(orgENGMent_history);
@@ -225,6 +226,13 @@ namespace Microsoft.Bot.Sample.SimpleEchoBot
                     string intent = (string)Luis["intents"][0]["intent"];
                     string entity = (string)Luis["entities"][0]["entity"];
 
+                    intent = intent.Replace("\"", "");
+                    entity = entity.Replace("\"", "");
+                    entity = entity.Replace(" ", "");
+
+                    userData.SetProperty<string>(intent, orgENGMent_history);
+                    await stateClient.BotState.SetUserDataAsync(activity.ChannelId, activity.From.Id, userData);
+                    
                     List<LuisList> LuisDialogID = db.SelectLuis(intent, entity);
 
                     for(int i = 0; i < LuisDialogID.Count; i++)
@@ -387,8 +395,9 @@ namespace Microsoft.Bot.Sample.SimpleEchoBot
                         }
 
                         var reply1 = await connector.Conversations.SendToConversationAsync(reply2);
-
+                        
                     }
+
                 }else
                 {
                     Activity reply_err = activity.CreateReply();
@@ -442,7 +451,7 @@ namespace Microsoft.Bot.Sample.SimpleEchoBot
             Query = Uri.EscapeDataString(Query);
             JObject jsonObj = new JObject();
             string[] RequestURI = new string[2];
-            RequestURI[0] = "https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/81c9ba56-7577-42ae-b0ea-45ef0f2c56ca?subscription-key=7efb093087dd48918b903885b944740c" + "&timezoneOffset=0&verbose=true&q=" + Query;
+            RequestURI[0] = "https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/ac08a04f-3a5a-4bae-9eaa-47fe069d01b5?subscription-key=7489b95cf3fb4797939ea70ce94a4b11" + "&timezoneOffset=0&verbose=true&q=" + Query;
             RequestURI[1] = "https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/b1437ec6-3301-4c24-8bcb-1af58ee2c47c?subscription-key=7efb093087dd48918b903885b944740c" + "&timezoneOffset=0&verbose=true&q=" + Query;
 
             using (HttpClient client = new HttpClient())
@@ -457,7 +466,7 @@ namespace Microsoft.Bot.Sample.SimpleEchoBot
                         jsonObj = JObject.Parse(JsonDataResponse);
                     }
                     msg.Dispose();
-
+                    
                     if(jsonObj["entities"].Count() != 0 && (float)jsonObj["intents"][0]["score"] > 0.5)
                     {
                         break;
