@@ -235,172 +235,177 @@ namespace Microsoft.Bot.Sample.SimpleEchoBot
                     
                     List<LuisList> LuisDialogID = db.SelectLuis(intent, entity);
 
-                    for(int i = 0; i < LuisDialogID.Count; i++)
+                    if (LuisDialogID.Count == 0)
                     {
-                        Activity reply2 = activity.CreateReply();
-                        reply2.Recipient = activity.From;
-                        reply2.Type = "message";
-                        reply2.Attachments = new List<Attachment>();
-                        reply2.AttachmentLayout = AttachmentLayoutTypes.Carousel;
-
-                        int dlgID = LuisDialogID[i].dlgId;
-
-                        List<DialogList> dlg = db.SelectDialog(dlgID);
-
-                        for(int n = 0; n < dlg.Count; n++)
+                        Activity reply_err = activity.CreateReply();
+                        reply_err.Recipient = activity.From;
+                        reply_err.Type = "message";
+                        reply_err.Text = "I'm sorry. I do not know what you mean.";
+                        var reply1 = await connector.Conversations.SendToConversationAsync(reply_err);
+                    } else
+                    {
+                        for (int i = 0; i < LuisDialogID.Count; i++)
                         {
-                            string dlgType = dlg[n].dlgType;
+                            Activity reply2 = activity.CreateReply();
+                            reply2.Recipient = activity.From;
+                            reply2.Type = "message";
+                            reply2.Attachments = new List<Attachment>();
+                            reply2.AttachmentLayout = AttachmentLayoutTypes.Carousel;
 
-                            if(dlgType == TEXTDLG)
+                            int dlgID = LuisDialogID[i].dlgId;
+
+                            List<DialogList> dlg = db.SelectDialog(dlgID);
+
+                            for (int n = 0; n < dlg.Count; n++)
                             {
-                                List<TextList> text = db.SelectDialogText(dlg[n].dlgId);
+                                string dlgType = dlg[n].dlgType;
 
-                                for (int j = 0; j < text.Count; j++)
+                                if (dlgType == TEXTDLG)
                                 {
-                                    HeroCard plCard = new HeroCard()
-                                    {
-                                        Title = text[j].cardTitle,
-                                        Subtitle = text[j].cardText
-                                    };
+                                    List<TextList> text = db.SelectDialogText(dlg[n].dlgId);
 
-                                    Attachment plAttachment = plCard.ToAttachment();
-                                    reply2.Attachments.Add(plAttachment);
+                                    for (int j = 0; j < text.Count; j++)
+                                    {
+                                        HeroCard plCard = new HeroCard()
+                                        {
+                                            Title = text[j].cardTitle,
+                                            Subtitle = text[j].cardText
+                                        };
+
+                                        Attachment plAttachment = plCard.ToAttachment();
+                                        reply2.Attachments.Add(plAttachment);
+                                    }
+                                }
+                                else if (dlgType == CARDDLG)
+                                {
+                                    List<CardList> card = db.SelectDialogCard(dlg[n].dlgId);
+
+                                    for (int j = 0; j < card.Count; j++)
+                                    {
+                                        List<CardImage> cardImages = new List<CardImage>();
+                                        List<CardAction> cardButtons = new List<CardAction>();
+
+                                        if (card[j].imgUrl != null)
+                                        {
+                                            cardImages.Add(new CardImage(url: card[j].imgUrl));
+                                        }
+
+                                        if (card[j].btn1Type != null)
+                                        {
+                                            CardAction plButton = new CardAction()
+                                            {
+                                                Value = card[j].btn1Context,
+                                                Type = card[j].btn1Type,
+                                                Title = card[j].btn1Title
+                                            };
+
+                                            cardButtons.Add(plButton);
+                                        }
+
+                                        if (card[j].btn2Type != null)
+                                        {
+                                            CardAction plButton = new CardAction()
+                                            {
+                                                Value = card[j].btn2Context,
+                                                Type = card[j].btn2Type,
+                                                Title = card[j].btn2Title
+                                            };
+
+                                            cardButtons.Add(plButton);
+                                        }
+
+                                        if (card[j].btn3Type != null)
+                                        {
+                                            CardAction plButton = new CardAction()
+                                            {
+                                                Value = card[j].btn3Context,
+                                                Type = card[j].btn3Type,
+                                                Title = card[j].btn3Title
+                                            };
+
+                                            cardButtons.Add(plButton);
+                                        }
+
+                                        HeroCard plCard = new HeroCard()
+                                        {
+                                            Title = card[j].cardTitle,
+                                            Subtitle = card[j].cardSubTitle,
+                                            Images = cardImages,
+                                            Buttons = cardButtons
+                                        };
+
+                                        Attachment plAttachment = plCard.ToAttachment();
+                                        reply2.Attachments.Add(plAttachment);
+                                    }
+                                }
+                                else if (dlgType == MEDIADLG)
+                                {
+                                    List<MediaList> media = db.SelectDialogMedia(dlg[n].dlgId);
+
+                                    for (int j = 0; j < media.Count; j++)
+                                    {
+                                        List<MediaUrl> mediaURL = new List<MediaUrl>();
+                                        List<CardAction> cardButtons = new List<CardAction>();
+
+                                        if (media[j].mediaUrl != null)
+                                        {
+                                            mediaURL.Add(new MediaUrl(url: media[j].mediaUrl));
+                                        }
+
+                                        if (media[j].btn1Type != null)
+                                        {
+                                            CardAction plButton = new CardAction()
+                                            {
+                                                Value = media[j].btn1Context,
+                                                Type = media[j].btn1Type,
+                                                Title = media[j].btn1Title
+                                            };
+
+                                            cardButtons.Add(plButton);
+                                        }
+
+                                        if (media[j].btn2Type != null)
+                                        {
+                                            CardAction plButton = new CardAction()
+                                            {
+                                                Value = media[j].btn2Context,
+                                                Type = media[j].btn2Type,
+                                                Title = media[j].btn2Title
+                                            };
+
+                                            cardButtons.Add(plButton);
+                                        }
+
+                                        if (media[j].btn3Type != null)
+                                        {
+                                            CardAction plButton = new CardAction()
+                                            {
+                                                Value = media[j].btn3Context,
+                                                Type = media[j].btn3Type,
+                                                Title = media[j].btn3Title
+                                            };
+
+                                            cardButtons.Add(plButton);
+                                        }
+
+                                        VideoCard plCard = new VideoCard()
+                                        {
+                                            Title = media[j].cardTitle,
+                                            Text = media[j].cardText,
+                                            Media = mediaURL,
+                                            Buttons = cardButtons,
+                                            Autostart = false
+                                        };
+
+                                        Attachment plAttachment = plCard.ToAttachment();
+                                        reply2.Attachments.Add(plAttachment);
+                                    }
                                 }
                             }
-                            else if(dlgType == CARDDLG)
-                            {
-                                List<CardList> card = db.SelectDialogCard(dlg[n].dlgId);
 
-                                for (int j = 0; j < card.Count; j++)
-                                {
-                                    List<CardImage> cardImages = new List<CardImage>();
-                                    List<CardAction> cardButtons = new List<CardAction>();
+                            var reply1 = await connector.Conversations.SendToConversationAsync(reply2);
 
-                                    if (card[j].imgUrl != null)
-                                    {
-                                        cardImages.Add(new CardImage(url: card[j].imgUrl));
-                                    }
-
-                                    if (card[j].btn1Type != null)
-                                    {
-                                        CardAction plButton = new CardAction()
-                                        {
-                                            Value = card[j].btn1Context,
-                                            Type = card[j].btn1Type,
-                                            Title = card[j].btn1Title
-                                        };
-
-                                        cardButtons.Add(plButton);
-                                    }
-
-                                    if (card[j].btn2Type != null)
-                                    {
-                                        CardAction plButton = new CardAction()
-                                        {
-                                            Value = card[j].btn2Context,
-                                            Type = card[j].btn2Type,
-                                            Title = card[j].btn2Title
-                                        };
-
-                                        cardButtons.Add(plButton);
-                                    }
-
-                                    if (card[j].btn3Type != null)
-                                    {
-                                        CardAction plButton = new CardAction()
-                                        {
-                                            Value = card[j].btn3Context,
-                                            Type = card[j].btn3Type,
-                                            Title = card[j].btn3Title
-                                        };
-
-                                        cardButtons.Add(plButton);
-                                    }
-
-                                    HeroCard plCard = new HeroCard()
-                                    {
-                                        Title = card[j].cardTitle,
-                                        Subtitle = card[j].cardSubTitle,
-                                        Images = cardImages,
-                                        Buttons = cardButtons
-                                    };
-
-                                    Attachment plAttachment = plCard.ToAttachment();
-                                    reply2.Attachments.Add(plAttachment);
-                                }
-                            }
-                            else if(dlgType == MEDIADLG)
-                            {
-                                List<MediaList> media = db.SelectDialogMedia(dlg[n].dlgId);
-
-                                for (int j = 0; j < media.Count; j++)
-                                {
-                                    List<MediaUrl> mediaURL = new List<MediaUrl>();
-                                    List<CardAction> cardButtons = new List<CardAction>();
-
-                                    if (media[j].mediaUrl != null)
-                                    {
-                                        mediaURL.Add(new MediaUrl(url: media[j].mediaUrl));
-                                    }
-
-                                    if (media[j].btn1Type != null)
-                                    {
-                                        CardAction plButton = new CardAction()
-                                        {
-                                            Value = media[j].btn1Context,
-                                            Type = media[j].btn1Type,
-                                            Title = media[j].btn1Title
-                                        };
-
-                                        cardButtons.Add(plButton);
-                                    }
-
-                                    if (media[j].btn2Type != null)
-                                    {
-                                        CardAction plButton = new CardAction()
-                                        {
-                                            Value = media[j].btn2Context,
-                                            Type = media[j].btn2Type,
-                                            Title = media[j].btn2Title
-                                        };
-
-                                        cardButtons.Add(plButton);
-                                    }
-
-                                    if (media[j].btn3Type != null)
-                                    {
-                                        CardAction plButton = new CardAction()
-                                        {
-                                            Value = media[j].btn3Context,
-                                            Type = media[j].btn3Type,
-                                            Title = media[j].btn3Title
-                                        };
-
-                                        cardButtons.Add(plButton);
-                                    }
-
-                                    VideoCard plCard = new VideoCard()
-                                    {
-                                        Title = media[j].cardTitle,
-                                        Text = media[j].cardText,
-                                        Media = mediaURL,
-                                        Buttons = cardButtons,
-                                        Autostart = false
-                                    };
-
-                                    Attachment plAttachment = plCard.ToAttachment();
-                                    reply2.Attachments.Add(plAttachment);
-                                }
-                            }
                         }
-
-                        if(LuisDialogID.Count == 0 )
-                        {
-                            reply2.Text = "I'm sorry. I do not know what you mean.";
-                        }
-
-                        var reply1 = await connector.Conversations.SendToConversationAsync(reply2);
-                        
                     }
 
                 }else
@@ -472,7 +477,7 @@ namespace Microsoft.Bot.Sample.SimpleEchoBot
                     }
                     msg.Dispose();
                     
-                    if(jsonObj["entities"].Count() != 0 && (float)jsonObj["intents"][0]["score"] > 0.5)
+                    if(jsonObj["entities"].Count() != 0 && (float)jsonObj["intents"][0]["score"] > 0.3)
                     {
                         break;
                     }
