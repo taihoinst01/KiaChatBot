@@ -208,9 +208,9 @@ namespace Microsoft.Bot.Sample.SimpleEchoBot
 
                 orgMent = activity.Text;
 
-                //Translator translateInfo = await getTranslate(orgMent);
-                //orgENGMent_history = Regex.Replace(translateInfo.data.translations[0].translatedText, @"[^a-zA-Z0-9¤¡-ÆR-\s-&#39;]", "", RegexOptions.Singleline);
-                //orgENGMent_history = orgENGMent_history.Replace("&#39;", "'");
+                Translator translateInfo = await getTranslate(orgMent);
+                orgENGMent_history = Regex.Replace(translateInfo.data.translations[0].translatedText, @"[^a-zA-Z0-9¤¡-ÆR-\s-&#39;]", "", RegexOptions.Singleline);
+                orgENGMent_history = orgENGMent_history.Replace("&#39;", "'");
 
                 Luis = await GetIntentFromBotLUIS(orgMent);
 
