@@ -394,6 +394,11 @@ namespace Microsoft.Bot.Sample.SimpleEchoBot
                             }
                         }
 
+                        if(LuisDialogID.Count == 0 )
+                        {
+                            reply2.Text = "I'm sorry. I do not know what you mean.";
+                        }
+
                         var reply1 = await connector.Conversations.SendToConversationAsync(reply2);
                         
                     }
@@ -403,7 +408,7 @@ namespace Microsoft.Bot.Sample.SimpleEchoBot
                     Activity reply_err = activity.CreateReply();
                     reply_err.Recipient = activity.From;
                     reply_err.Type = "message";
-                    reply_err.Text = "죄송해요. 무슨 말인지 잘 모르겠어요.";
+                    reply_err.Text = "I'm sorry. I do not know what you mean.";
                     var reply1 = await connector.Conversations.SendToConversationAsync(reply_err);
                 }
 
@@ -450,9 +455,9 @@ namespace Microsoft.Bot.Sample.SimpleEchoBot
         {
             Query = Uri.EscapeDataString(Query);
             JObject jsonObj = new JObject();
-            string[] RequestURI = new string[2];
+            string[] RequestURI = new string[1];
             RequestURI[0] = "https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/ac08a04f-3a5a-4bae-9eaa-47fe069d01b5?subscription-key=7489b95cf3fb4797939ea70ce94a4b11" + "&timezoneOffset=0&verbose=true&q=" + Query;
-            RequestURI[1] = "https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/b1437ec6-3301-4c24-8bcb-1af58ee2c47c?subscription-key=7efb093087dd48918b903885b944740c" + "&timezoneOffset=0&verbose=true&q=" + Query;
+            //RequestURI[1] = "https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/b1437ec6-3301-4c24-8bcb-1af58ee2c47c?subscription-key=7efb093087dd48918b903885b944740c" + "&timezoneOffset=0&verbose=true&q=" + Query;
 
             using (HttpClient client = new HttpClient())
             {
