@@ -224,11 +224,16 @@ namespace Microsoft.Bot.Sample.SimpleEchoBot
                 if(luisScore > 0 && luisEntityCount > 0)
                 {
                     string intent = (string)Luis["intents"][0]["intent"];
-                    string entity = (string)Luis["entities"][0]["entity"];
+                    string[] entity = new string[luisEntityCount];
+
+                    for(int entityCount = 0; entityCount < luisEntityCount; entityCount++ )
+                    {
+                        entity[entityCount] = (string)Luis["entities"][entityCount]["entity"];
+                        entity[entityCount] = entity[entityCount].Replace("\"", "");
+                        entity[entityCount] = entity[entityCount].Replace(" ", "");
+                    }
 
                     intent = intent.Replace("\"", "");
-                    entity = entity.Replace("\"", "");
-                    entity = entity.Replace(" ", "");
 
                     userData.SetProperty<string>(intent, orgENGMent_history);
                     await stateClient.BotState.SetUserDataAsync(activity.ChannelId, activity.From.Id, userData);
@@ -240,8 +245,22 @@ namespace Microsoft.Bot.Sample.SimpleEchoBot
                         Activity reply_err = activity.CreateReply();
                         reply_err.Recipient = activity.From;
                         reply_err.Type = "message";
-                        reply_err.Text = "I'm sorry. I do not know what you mean.";
-                        var reply1 = await connector.Conversations.SendToConversationAsync(reply_err);
+
+                        List<TextList> text = db.SelectDialogText(1005);
+
+                        for (int j = 0; j < text.Count; j++)
+                        {
+                            HeroCard plCard = new HeroCard()
+                            {
+                                Title = text[j].cardTitle,
+                                Subtitle = text[j].cardText
+                            };
+
+                            Attachment plAttachment = plCard.ToAttachment();
+                            reply_err.Attachments.Add(plAttachment);
+                        }
+                        await connector.Conversations.SendToConversationAsync(reply_err);
+
                     } else
                     {
                         for (int i = 0; i < LuisDialogID.Count; i++)
@@ -413,8 +432,29 @@ namespace Microsoft.Bot.Sample.SimpleEchoBot
                     Activity reply_err = activity.CreateReply();
                     reply_err.Recipient = activity.From;
                     reply_err.Type = "message";
+
+                    List<TextList> text = db.SelectDialogText(1005);
+
+                    for (int j = 0; j < text.Count; j++)
+                    {
+                        HeroCard plCard = new HeroCard()
+                        {
+                            Title = text[j].cardTitle,
+                            Subtitle = text[j].cardText
+                        };
+
+                        Attachment plAttachment = plCard.ToAttachment();
+                        reply_err.Attachments.Add(plAttachment);
+                    }
+                    await connector.Conversations.SendToConversationAsync(reply_err);
+
+                    /*
+                    Activity reply_err = activity.CreateReply();
+                    reply_err.Recipient = activity.From;
+                    reply_err.Type = "message";
                     reply_err.Text = "I'm sorry. I do not know what you mean.";
                     var reply1 = await connector.Conversations.SendToConversationAsync(reply_err);
+                    */
                 }
 
             }
