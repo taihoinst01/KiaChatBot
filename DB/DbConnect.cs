@@ -12,7 +12,7 @@ namespace SimpleEchoBot.DB
 {
     public class DbConnect
     {
-        string connStr = "Data Source=faxtimedb.database.windows.net;Initial Catalog=taihoLab;User ID=faxtime;Password=test2016!;";
+        string connStr = "Data Source=taihoinst.database.windows.net;Initial Catalog=taihoLab;User ID=faxtime;Password=taiho123@;";
         StringBuilder sb = new StringBuilder();
 
         public List<DialogList> SelectInitDialog()
